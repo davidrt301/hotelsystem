@@ -3,21 +3,22 @@ package com.vdrt.hotelsystem.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.vdrt.hotelsystem.model.Hotel;
+import com.vdrt.hotelsystem.dto.hotel.HotelRequestDTO;
+import com.vdrt.hotelsystem.dto.hotel.HotelResponseDTO;
 
 public interface HotelService {
 
-    List<Hotel> listarTodos(); // retorna todos los hoteles
+    List<HotelResponseDTO> listarTodos(); // retorna todos los hoteles
 
-    Optional<Hotel> buscarPorId(Long id);
+    Optional<HotelResponseDTO> buscarPorId(Long id);
 
-    List<Hotel> buscarPorCiudad(String ciudad);
+    List<HotelResponseDTO> buscarPorCiudad(String ciudad);
 
-    Hotel crear(Hotel hotel); // persiste un nuevo hotel
+    HotelResponseDTO crear(HotelRequestDTO hotel); // persiste un nuevo hotel
 
-    Hotel actualizar(Long id, Hotel hotel); // actualiza un hotel existente
+    HotelResponseDTO actualizar(Long id, HotelRequestDTO dto); // actualiza un hotel existente
 
     void eliminar(Long id);
 
-    List<Hotel> buscarConHabitacionesDisponibles(); // usa la consulta JPQL del repositorio
+    List<HotelResponseDTO> buscarConHabitacionesDisponibles(); // usa la consulta JPQL del repositorio
 }

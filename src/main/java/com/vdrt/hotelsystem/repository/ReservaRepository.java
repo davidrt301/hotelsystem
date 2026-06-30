@@ -6,16 +6,15 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.vdrt.hotelsystem.model.Reserva;
+import com.vdrt.hotelsystem.model.enums.Estado;
 
-@Repository
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findByHuespedId(Long huespedId);
 
-    List<Reserva> findByEstado(String estado);
+    List<Reserva> findByEstado(Estado estado);
 
     @Query("SELECT r FROM Reserva r WHERE r.fechaIngreso <= :fechaFin AND r.fechaSalida >= :fechaInicio")
     List<Reserva> findReservasEntreFechas(

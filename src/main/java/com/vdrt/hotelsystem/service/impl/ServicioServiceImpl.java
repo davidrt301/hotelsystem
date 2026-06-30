@@ -5,38 +5,66 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.vdrt.hotelsystem.dto.servicio.ServicioMapper;
+import com.vdrt.hotelsystem.dto.servicio.ServicioRequestDTO;
+import com.vdrt.hotelsystem.dto.servicio.ServicioResponseDTO;
+import com.vdrt.hotelsystem.exception.ResourceNotFoundException;
 import com.vdrt.hotelsystem.model.Servicio;
+import com.vdrt.hotelsystem.repository.ServicioRepository;
 import com.vdrt.hotelsystem.service.ServicioService;
 
 @Service
 public class ServicioServiceImpl implements ServicioService {
 
+    private final ServicioRepository servicioRepo;
+    private final ServicioMapper mapper;
+
+
+    public ServicioServiceImpl(ServicioRepository servicioRepository, ServicioMapper mapper) {
+        this.servicioRepo = servicioRepository;
+        this.mapper = mapper;
+        }
+
     @Override
-    public List<Servicio> listarTodos() {
-        return null;
+    public List<ServicioResponseDTO> listarTodos() {
+        return servicioRepo.findAll().stream().map(mapper::toResponseDTO).toList();
     }
 
     @Override
-    public List<Servicio> listarDisponibles() {
-        return null;
+    public List<ServicioResponseDTO> listarDisponibles() {
+        return servicioRepo.findByDisponible(true).stream().map(mapper::toResponseDTO).toList();
     }
 
     @Override
-    public Optional<Servicio> buscarPorId(Long id) {
-        return null;
+    public Optional<ServicioResponseDTO> buscarPorId(Long id) {
+        return servicioRepo.findById(id).map(mapper::toResponseDTO);
     }
 
     @Override
-    public Servicio crear(Servicio servicio) {
-        return null;
+    public ServicioResponseDTO crear(ServicioRequestDTO servicio) {
+        Servicio service = mapper.toEntity(servicio);
+        servicioRepo.save(service);
+        return mapper.toResponseDTO(service);
     }
 
     @Override
-    public Servicio actualizar(Long id, Servicio servicio) {
-        return null;
-    }
+public ServicioResponseDTO actualizar(Long id, ServicioRequestDTO servicio) {
+    Servicio servicioExistente = servicioRepo.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                    String.format("No existe servicio con id: %s", id)));
+
+    servicioExistente.setNombre(servicio.getNombre());
+    servicioExistente.setDescripcion(servicio.getDescripcion());
+    servicioExistente.setPrecio(servicio.getPrecio());
+    servicioExistente.setDisponible(servicio.isDisponible());
+
+    Servicio servicioActualizado = servicioRepo.save(servicioExistente);
+
+    return mapper.toResponseDTO(servicioActualizado);
+}
 
     @Override
     public void eliminar(Long id) {
+        servicioRepo.deleteById(id);
     }
 }

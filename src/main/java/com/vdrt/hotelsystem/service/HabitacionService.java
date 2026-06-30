@@ -3,23 +3,24 @@ package com.vdrt.hotelsystem.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.vdrt.hotelsystem.model.Habitacion;
+import com.vdrt.hotelsystem.dto.habitacion.HabitacionRequestDTO;
+import com.vdrt.hotelsystem.dto.habitacion.HabitacionResponseDTO;
 
 public interface HabitacionService {
 
-    List<Habitacion> listarTodas();
+    List<HabitacionResponseDTO> listarTodas();
 
-    Optional<Habitacion> buscarPorId(Long id);
+    Optional<HabitacionResponseDTO> buscarPorId(Long id);
 
-    List<Habitacion> listarPorHotel(Long hotelId);
+    List<HabitacionResponseDTO> listarPorHotel(Long hotelId);
 
-    List<Habitacion> listarDisponiblesPorHotel(Long hotelId);
+    List<HabitacionResponseDTO> listarDisponiblesPorHotel(Long hotelId);
 
-    Habitacion crear(Habitacion habitacion, Long hotelId);
+    HabitacionResponseDTO crear(HabitacionRequestDTO dto, Long hotelId);
 
-    Habitacion actualizar(Long id, Habitacion habitacion);
+    HabitacionResponseDTO actualizar(Long id, HabitacionRequestDTO dto);
 
     void eliminar(Long id);
 
-    List<Habitacion> buscarPorPrecioMaximo(Double precioMaximo);
+    List<HabitacionResponseDTO> buscarPorPrecioMaximo(Double precioMaximo);
 }

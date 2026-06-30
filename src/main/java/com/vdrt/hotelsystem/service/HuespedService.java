@@ -3,20 +3,21 @@ package com.vdrt.hotelsystem.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.vdrt.hotelsystem.model.Huesped;
+import com.vdrt.hotelsystem.dto.huesped.HuespedRequestDTO;
+import com.vdrt.hotelsystem.dto.huesped.HuespedResponseDTO;
 
 public interface HuespedService {
 
-    List<Huesped> listarTodos();
+    List<HuespedResponseDTO> listarTodos();
 
-    Optional<Huesped> buscarPorId(Long id);
+    Optional<HuespedResponseDTO> buscarPorId(Long id);
 
-    Huesped crear(Huesped huesped);
+    HuespedResponseDTO crear(HuespedRequestDTO huesped);
 
-    Huesped actualizar(Long id, Huesped huesped);
+    HuespedResponseDTO actualizar(Long id, HuespedRequestDTO huesped);
 
     void eliminar(Long id);
 
-    List<Huesped> buscarPorNombreOApellido(String texto);
+    List<HuespedResponseDTO> buscarPorNombreOApellido(String texto);
 
 }
