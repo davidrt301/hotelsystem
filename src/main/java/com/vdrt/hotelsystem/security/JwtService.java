@@ -2,6 +2,8 @@ package com.vdrt.hotelsystem.security;
 
 import com.vdrt.hotelsystem.model.Usuario;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,8 +59,15 @@ public class JwtService {
     }
 
     public boolean esTokenValido(String token, String emailEsperado) {
-        String email = extraerEmail(token);
-        return email.equals(emailEsperado) && !esTokenExpirado(token);
+        try {
+            String email = extraerEmail(token);
+            return email.equals(emailEsperado) && !esTokenExpirado(token);
+        } catch (ExpiredJwtException e) {
+            return false;
+        } catch (JwtException | IllegalArgumentException e) {
+            // token malformado, firma invalida, o argumento nulo/vacio
+            return false;
+        }
     }
 
     private boolean esTokenExpirado(String token) {
