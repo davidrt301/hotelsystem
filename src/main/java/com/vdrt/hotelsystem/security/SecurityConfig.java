@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(jwtAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/hotels/**").hasAnyRole("ADMIN", "RECEPCIONISTA")
                         .requestMatchers("/api/v1/huespedes/**").hasAnyRole("ADMIN", "RECEPCIONISTA")
                         .requestMatchers("/api/v1/reservas/**").authenticated()
