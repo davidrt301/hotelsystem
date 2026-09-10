@@ -1,6 +1,46 @@
 # Hotel System
 
-API backend desarrollada con Java 17, Spring Boot, Spring Web MVC, Spring Data JPA, Bean Validation, Lombok y PostgreSQL. El proyecto permite gestionar hoteles, habitaciones, huespedes, reservas y servicios adicionales.
+API REST para la gestión integral de un sistema hotelero: hoteles, habitaciones, huéspedes, reservas y servicios adicionales, protegida con autenticación y autorización basada en JWT.
+
+Desarrollada con **Java 17**, **Spring Boot**, **Spring Web MVC**, **Spring Data JPA**, **Spring Security**, **Bean Validation**, **Lombok**, **JJWT** y **PostgreSQL**.
+
+## Tabla de contenido
+
+- [Características](#características)
+- [Stack tecnológico](#stack-tecnológico)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Modelo de dominio](#modelo-de-dominio)
+- [Autenticación y autorización](#autenticación-y-autorización)
+- [Endpoints de la API](#endpoints-de-la-api)
+- [Configuración](#configuración)
+- [Puesta en marcha](#puesta-en-marcha)
+- [Documentación Swagger](#documentación-swagger)
+- [Pruebas](#pruebas)
+- [Manejo de errores](#manejo-de-errores)
+
+## Características
+
+- CRUD completo de hoteles, habitaciones, huéspedes, reservas y servicios.
+- Autenticación con **JWT** (access token + refresh token) y sesiones *stateless*.
+- Refresh tokens persistidos en base de datos, revocables y rotados en cada uso.
+- Autorización basada en roles (`ADMIN`, `RECEPCIONISTA`, `HUESPED`) mediante `hasAnyRole` y `@EnableMethodSecurity`.
+- Capa de DTOs con *mappers* manuales para no exponer las entidades JPA directamente.
+- Manejo centralizado de errores (`GlobalExceptionHandler`) y excepciones de dominio (`ResourceNotFoundException`, `ConflictException`).
+- Documentación interactiva con Swagger / OpenAPI, incluyendo autenticación Bearer.
+- Configuración externalizada por variables de entorno mediante `spring.config.import` (`.env`).
+
+## Stack tecnológico
+
+| Categoría        | Tecnología                                           |
+|-------------------|-------------------------------------------------------|
+| Lenguaje          | Java 17                                                |
+| Framework         | Spring Boot (Spring Web MVC, Spring Data JPA, Spring Security) |
+| Seguridad         | JWT (`jjwt-api`, `jjwt-impl`, `jjwt-gson`), BCrypt     |
+| Base de datos     | PostgreSQL                                             |
+| Validación        | Jakarta Bean Validation                                |
+| Documentación     | springdoc-openapi (Swagger UI)                         |
+| Utilidades        | Lombok                                                 |
+| Build tool        | Maven (`mvnw` / `mvnw.cmd`)                            |
 
 ## Estructura del proyecto
 
@@ -11,178 +51,259 @@ hotelsystem/
 │       └── maven-wrapper.properties
 ├── src/
 │   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── vdrt/
-│   │   │           └── hotelsystem/
-│   │   │               ├── HotelsystemApplication.java
-│   │   │               ├── controller/
-│   │   │               │   ├── HabitacionController.java
-│   │   │               │   ├── HotelController.java
-│   │   │               │   ├── HuespedController.java
-│   │   │               │   ├── ReservaController.java
-│   │   │               │   └── ServicioController.java
-│   │   │               ├── dto/
-│   │   │               │   ├── habitacion/
-│   │   │               │   ├── hotel/
-│   │   │               │   ├── huesped/
-│   │   │               │   ├── perfilcontacto/
-│   │   │               │   ├── reserva/
-│   │   │               │   └── servicio/
-│   │   │               ├── exception/
-│   │   │               │   ├── ConflictException.java
-│   │   │               │   ├── GlobalExceptionHandler.java
-│   │   │               │   └── ResourceNotFoundException.java
-│   │   │               ├── model/
-│   │   │               │   ├── Habitacion.java
-│   │   │               │   ├── Hotel.java
-│   │   │               │   ├── Huesped.java
-│   │   │               │   ├── PerfilContacto.java
-│   │   │               │   ├── Reserva.java
-│   │   │               │   ├── Servicio.java
-│   │   │               │   └── enums/
-│   │   │               │       ├── Estado.java
-│   │   │               │       └── Tipo.java
-│   │   │               ├── repository/
-│   │   │               │   ├── HabitacionRepository.java
-│   │   │               │   ├── HotelRepository.java
-│   │   │               │   ├── HuespedRepository.java
-│   │   │               │   ├── ReservaRepository.java
-│   │   │               │   └── ServicioRepository.java
-│   │   │               └── service/
-│   │   │                   ├── HabitacionService.java
-│   │   │                   ├── HotelService.java
-│   │   │                   ├── HuespedService.java
-│   │   │                   ├── ReservaService.java
-│   │   │                   ├── ServicioService.java
-│   │   │                   └── impl/
-│   │   │                       ├── HabitacionServiceImpl.java
-│   │   │                       ├── HotelServiceImpl.java
-│   │   │                       ├── HuespedServiceImpl.java
-│   │   │                       ├── ReservaServiceImpl.java
-│   │   │                       └── ServicioServiceImpl.java
+│   │   ├── java/com/vdrt/hotelsystem/
+│   │   │   ├── HotelsystemApplication.java
+│   │   │   ├── config/
+│   │   │   │   └── OpenApiConfig.java
+│   │   │   ├── controller/
+│   │   │   │   ├── AuthController.java
+│   │   │   │   ├── HabitacionController.java
+│   │   │   │   ├── HotelController.java
+│   │   │   │   ├── HuespedController.java
+│   │   │   │   ├── ReservaController.java
+│   │   │   │   └── ServicioController.java
+│   │   │   ├── dto/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── habitacion/
+│   │   │   │   ├── hotel/
+│   │   │   │   ├── huesped/
+│   │   │   │   ├── perfilcontacto/
+│   │   │   │   ├── reserva/
+│   │   │   │   └── servicio/
+│   │   │   ├── exception/
+│   │   │   │   ├── ConflictException.java
+│   │   │   │   ├── GlobalExceptionHandler.java
+│   │   │   │   └── ResourceNotFoundException.java
+│   │   │   ├── model/
+│   │   │   │   ├── Habitacion.java
+│   │   │   │   ├── Hotel.java
+│   │   │   │   ├── Huesped.java
+│   │   │   │   ├── PerfilContacto.java
+│   │   │   │   ├── RefreshToken.java
+│   │   │   │   ├── Reserva.java
+│   │   │   │   ├── Servicio.java
+│   │   │   │   ├── Usuario.java
+│   │   │   │   └── enums/
+│   │   │   │       ├── Estado.java
+│   │   │   │       ├── Rol.java
+│   │   │   │       └── Tipo.java
+│   │   │   ├── repository/
+│   │   │   │   ├── HabitacionRepository.java
+│   │   │   │   ├── HotelRepository.java
+│   │   │   │   ├── HuespedRepository.java
+│   │   │   │   ├── RefreshTokenRepository.java
+│   │   │   │   ├── ReservaRepository.java
+│   │   │   │   ├── ServicioRepository.java
+│   │   │   │   └── UsuarioRepository.java
+│   │   │   ├── security/
+│   │   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   │   ├── JwtService.java
+│   │   │   │   ├── SecurityConfig.java
+│   │   │   │   ├── UserDetailsServiceImpl.java
+│   │   │   │   ├── UsuarioDetailsImpl.java
+│   │   │   │   └── handler/
+│   │   │   │       ├── JwtAccessDeniedHandler.java
+│   │   │   │       └── JwtAuthenticationEntryPoint.java
+│   │   │   └── service/
+│   │   │       ├── AuthService.java
+│   │   │       ├── HabitacionService.java
+│   │   │       ├── HotelService.java
+│   │   │       ├── HuespedService.java
+│   │   │       ├── ReservaService.java
+│   │   │       ├── ServicioService.java
+│   │   │       └── impl/
+│   │   │           ├── AuthServiceImpl.java
+│   │   │           ├── HabitacionServiceImpl.java
+│   │   │           ├── HotelServiceImpl.java
+│   │   │           ├── HuespedServiceImpl.java
+│   │   │           ├── ReservaServiceImpl.java
+│   │   │           └── ServicioServiceImpl.java
 │   │   └── resources/
 │   │       └── application.properties
 │   └── test/
-│       └── java/
-│           └── com/
-│               └── vdrt/
-│                   └── hotelsystem/
-│                       └── HotelsystemApplicationTests.java
+│       └── java/com/vdrt/hotelsystem/
+│           ├── HotelsystemApplicationTests.java
+│           └── security/
+│               └── JwtServiceTest.java
 ├── .gitignore
-├── HELP.md
 ├── mvnw
 ├── mvnw.cmd
 ├── pom.xml
-└── READMI.md
+└── README.md
 ```
 
 ## Capas principales
 
-- `controller`: expone los endpoints REST de la API.
-- `service`: define la logica de negocio mediante interfaces.
-- `service.impl`: implementa la logica de negocio y coordina repositorios.
-- `repository`: contiene interfaces de acceso a datos con Spring Data JPA.
-- `model`: contiene las entidades JPA que representan las tablas de la base de datos.
-- `dto`: contiene objetos de entrada, salida y mappers por cada recurso.
-- `exception`: centraliza excepciones y manejo global de errores.
+- **`controller`**: expone los endpoints REST de la API.
+- **`service` / `service.impl`**: define e implementa la lógica de negocio, coordinando repositorios.
+- **`repository`**: interfaces de acceso a datos con Spring Data JPA.
+- **`model`**: entidades JPA que representan las tablas de la base de datos.
+- **`dto`**: objetos de entrada/salida y *mappers* por recurso, para no exponer las entidades directamente.
+- **`security`**: filtro JWT, servicio de tokens, configuración de Spring Security y manejadores de errores de autenticación/autorización.
+- **`exception`**: excepciones de dominio y manejo global de errores HTTP.
+- **`config`**: configuración transversal (OpenAPI/Swagger).
 
-## Entidades del dominio
+## Modelo de dominio
 
-- `Hotel`: representa un hotel con nombre, ciudad, direccion, categoria, telefono y habitaciones.
-- `Habitacion`: representa una habitacion asociada a un hotel, con numero, tipo, precio por noche y disponibilidad.
-- `Huesped`: representa un cliente del hotel, con datos personales, documento, email y perfil de contacto.
-- `PerfilContacto`: contiene telefono, telefono de emergencia, direccion, pais y nacionalidad del huesped.
-- `Reserva`: representa una reserva con fechas, estado, total calculado, huesped, habitacion y servicios asociados.
-- `Servicio`: representa servicios adicionales disponibles para una reserva.
+- **`Hotel`**: nombre, ciudad, dirección, categoría, teléfono y habitaciones asociadas.
+- **`Habitacion`**: número, tipo, precio por noche y disponibilidad, asociada a un hotel.
+- **`Huesped`**: datos personales, documento, email y perfil de contacto.
+- **`PerfilContacto`**: teléfono, teléfono de emergencia, dirección, país y nacionalidad del huésped.
+- **`Reserva`**: fechas, estado, total calculado, huésped, habitación y servicios asociados.
+- **`Servicio`**: servicios adicionales disponibles para una reserva.
+- **`Usuario`**: cuenta de acceso (email, password cifrada, rol, estado habilitado), opcionalmente vinculada a un `Huesped`.
+- **`RefreshToken`**: token de refresco persistido, asociado a un `Usuario`, con fecha de expiración y estado de revocación.
 
-## Relaciones principales
+### Relaciones principales
 
-- Un `Hotel` tiene muchas `Habitacion`.
-- Una `Habitacion` pertenece a un `Hotel`.
-- Un `Huesped` tiene un `PerfilContacto`.
-- Un `Huesped` puede tener muchas `Reserva`.
-- Una `Reserva` pertenece a un `Huesped`.
-- Una `Reserva` pertenece a una `Habitacion`.
-- Una `Reserva` puede tener muchos `Servicio`.
-- Un `Servicio` puede estar asociado a muchas reservas.
+- Un `Hotel` tiene muchas `Habitacion`; una `Habitacion` pertenece a un `Hotel`.
+- Un `Huesped` tiene un `PerfilContacto` y puede tener muchas `Reserva`.
+- Una `Reserva` pertenece a un `Huesped` y a una `Habitacion`, y puede tener muchos `Servicio`.
+- Un `Usuario` puede estar vinculado a un `Huesped` y tiene muchos `RefreshToken`.
 
-## Enumeraciones
+### Enumeraciones
 
-- `Tipo`: `SIMPLE`, `DOBLE`, `SUITE`.
-- `Estado`: `PENDIENTE`, `CONFIRMADA`, `CANCELADA`, `COMPLETADA`.
+- **`Tipo`**: `SIMPLE`, `DOBLE`, `SUITE`.
+- **`Estado`**: `PENDIENTE`, `CONFIRMADA`, `CANCELADA`, `COMPLETADA`.
+- **`Rol`**: `ADMIN`, `RECEPCIONISTA`, `HUESPED`.
 
-## Endpoints principales
+## Autenticación y autorización
 
-### Hoteles
+El proyecto implementa una capa de seguridad completa basada en **JWT** sobre **Spring Security**:
 
-- `GET /api/hotels`: listar todos los hoteles.
-- `GET /api/hotels/{id}`: buscar hotel por ID.
-- `GET /api/hotels/disponibles`: listar hoteles con habitaciones disponibles.
-- `POST /api/hotels`: crear hotel.
-- `PUT /api/hotels/{id}`: actualizar hotel.
-- `DELETE /api/hotels/{id}`: eliminar hotel.
+- **Sesiones *stateless*** (`SessionCreationPolicy.STATELESS`) y CSRF deshabilitado, propios de una API REST consumida por clientes externos.
+- **`JwtService`**: genera y valida access tokens y refresh tokens firmados, incluyendo el rol del usuario como *claim*.
+- **`JwtAuthenticationFilter`**: intercepta cada petición, valida el token del header `Authorization: Bearer <token>` y construye el contexto de seguridad.
+- **`RefreshToken` persistido en base de datos**: permite revocar sesiones activas y se **rota** (se invalida el anterior y se emite uno nuevo) en cada llamada a `/refresh`.
+- **Verificación de estado por request**: el campo `habilitado` del `Usuario` se valida contra la base de datos en cada petición autenticada.
+- **`UserDetailsServiceImpl` / `UsuarioDetailsImpl`**: adaptan `Usuario` al modelo de `UserDetails` de Spring Security.
+- **Manejadores personalizados**: `JwtAuthenticationEntryPoint` (401 - no autenticado) y `JwtAccessDeniedHandler` (403 - sin permisos).
+- **Autorización por rol**: rutas de administración restringidas con `hasAnyRole(...)`, resto de rutas protegidas con `authenticated()`; los endpoints de `/api/v1/auth/**` y de documentación (`/swagger-ui/**`, `/v3/api-docs/**`) son públicos.
 
-### Habitaciones
+### Flujo de uso
 
-- `GET /api`: listar todas las habitaciones.
-- `GET /api/habitaciones/{id}`: buscar habitacion por ID.
-- `GET /api/hotels/{hotelId}/habitaciones/disponibles`: listar habitaciones disponibles por hotel.
-- `GET /api/habitaciones/precio-maximo?precio={valor}`: buscar habitaciones por precio maximo.
-- `POST /api/hotels/{hotelId}/habitaciones`: crear habitacion para un hotel.
-- `PUT /api/habitaciones/{id}`: actualizar habitacion.
-- `DELETE /api/habitaciones/{id}`: eliminar habitacion.
+1. `POST /api/v1/auth/login` con `email` y `password` → devuelve `accessToken`, `refreshToken` y `rol`.
+2. Se envía el `accessToken` en el header `Authorization: Bearer <accessToken>` en cada petición a los endpoints protegidos.
+3. Cuando el `accessToken` expira, se llama a `POST /api/v1/auth/refresh` con el `refreshToken` vigente para obtener un nuevo par de tokens.
+4. `POST /api/v1/auth/logout` revoca el `refreshToken` indicado, cerrando la sesión.
 
-### Huespedes
+## Endpoints de la API
 
-- `GET /api/huespedes`: listar todos los huespedes.
-- `GET /api/huespedes/{id}`: buscar huesped por ID.
-- `GET /api/huespedes/buscar?texto={valor}`: buscar huesped por nombre o apellido.
-- `POST /api/huespedes`: crear huesped.
-- `PUT /api/huespedes/{id}`: actualizar huesped.
-- `DELETE /api/huespedes/{id}`: eliminar huesped.
+### Autenticación (`/api/v1/auth`)
 
-### Reservas
+| Método | Endpoint   | Descripción                                  | Acceso  |
+|--------|------------|-----------------------------------------------|---------|
+| POST   | `/login`   | Autentica un usuario y devuelve los tokens    | Público |
+| POST   | `/refresh` | Rota el refresh token y genera nuevos tokens  | Público |
+| POST   | `/logout`  | Revoca el refresh token indicado              | Público |
 
-- `GET /api/reservas`: listar todas las reservas.
-- `GET /api/reservas/{id}`: buscar reserva por ID.
-- `GET /api/reservas/huesped/{huespedId}`: listar reservas por huesped.
-- `GET /api/reservas/estado?estado={estado}`: listar reservas por estado.
-- `POST /api/reservas`: crear reserva.
-- `PUT /api/reservas/{id}`: actualizar reserva.
-- `PATCH /api/reservas/{id}/cancelar`: cancelar reserva.
-- `POST /api/reservas/{id}/servicios/{servicioId}`: agregar servicio a una reserva.
+### Hoteles (`/api/hotels`)
 
-### Servicios
+| Método | Endpoint          | Descripción                                    |
+|--------|-------------------|--------------------------------------------------|
+| GET    | `/`                | Listar todos los hoteles                        |
+| GET    | `/{id}`            | Buscar hotel por ID                              |
+| GET    | `/disponibles`     | Listar hoteles con habitaciones disponibles      |
+| POST   | `/`                | Crear hotel                                      |
+| PUT    | `/{id}`            | Actualizar hotel                                 |
+| DELETE | `/{id}`            | Eliminar hotel                                   |
 
-- `GET /api/servicios`: listar todos los servicios.
-- `GET /api/servicios/disponibles`: listar servicios disponibles.
-- `GET /api/servicios/{id}`: buscar servicio por ID.
-- `POST /api/servicios`: crear servicio.
-- `PUT /api/servicios/{id}`: actualizar servicio.
-- `DELETE /api/servicios/{id}`: eliminar servicio.
+### Habitaciones (`/api`)
 
-## Configuracion
+| Método | Endpoint                                              | Descripción                                  |
+|--------|----------------------------------------------------------|-----------------------------------------------|
+| GET    | `/`                                                       | Listar todas las habitaciones                |
+| GET    | `/habitaciones/{id}`                                      | Buscar habitación por ID                     |
+| GET    | `/hotels/{hotelId}/habitaciones/disponibles`              | Listar habitaciones disponibles por hotel    |
+| GET    | `/habitaciones/precio-maximo?precio={valor}`              | Buscar habitaciones por precio máximo        |
+| POST   | `/hotels/{hotelId}/habitaciones`                          | Crear habitación para un hotel               |
+| PUT    | `/habitaciones/{id}`                                      | Actualizar habitación                        |
+| DELETE | `/habitaciones/{id}`                                      | Eliminar habitación                          |
 
-La configuracion principal se encuentra en:
+### Huéspedes (`/api/huespedes`)
 
-```text
-src/main/resources/application.properties
-```
+| Método | Endpoint          | Descripción                                 |
+|--------|-------------------|-----------------------------------------------|
+| GET    | `/`                | Listar todos los huéspedes                   |
+| GET    | `/{id}`            | Buscar huésped por ID                        |
+| GET    | `/buscar?texto=`   | Buscar huésped por nombre o apellido         |
+| POST   | `/`                | Crear huésped                                |
+| PUT    | `/{id}`            | Actualizar huésped                           |
+| DELETE | `/{id}`            | Eliminar huésped                             |
 
-Valores actuales:
+### Reservas (`/api/reservas`)
+
+| Método | Endpoint                              | Descripción                             |
+|--------|------------------------------------------|--------------------------------------------|
+| GET    | `/`                                       | Listar todas las reservas                |
+| GET    | `/{id}`                                   | Buscar reserva por ID                    |
+| GET    | `/huesped/{huespedId}`                    | Listar reservas por huésped              |
+| GET    | `/estado?estado={estado}`                 | Listar reservas por estado               |
+| POST   | `/`                                       | Crear reserva                            |
+| PUT    | `/{id}`                                   | Actualizar reserva                       |
+| PATCH  | `/{id}/cancelar`                          | Cancelar reserva                         |
+| POST   | `/{id}/servicios/{servicioId}`            | Agregar servicio a una reserva           |
+
+### Servicios (`/api/servicios`)
+
+| Método | Endpoint          | Descripción                                 |
+|--------|-------------------|-----------------------------------------------|
+| GET    | `/`                | Listar todos los servicios                   |
+| GET    | `/disponibles`     | Listar servicios disponibles                 |
+| GET    | `/{id}`            | Buscar servicio por ID                       |
+| POST   | `/`                | Crear servicio                               |
+| PUT    | `/{id}`            | Actualizar servicio                          |
+| DELETE | `/{id}`            | Eliminar servicio                            |
+
+> Todos los endpoints salvo `/api/v1/auth/**` y la documentación Swagger requieren un `accessToken` JWT válido en el header `Authorization`.
+
+## Configuración
+
+La configuración se encuentra en `src/main/resources/application.properties` y se carga de forma externalizada desde un archivo `.env` en la raíz del proyecto (no versionado, ver `.gitignore`):
 
 ```properties
 spring.application.name=hotelsystem
-spring.datasource.url=jdbc:postgresql://localhost:5432/hotel_system_db
-spring.datasource.username=postgres
-spring.datasource.password=1234
+
+spring.config.import=optional:file:.env[.properties]
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USER}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
 server.port=8090
+
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION}
+jwt.refresh-expiration=${JWT_REFRESH_EXPIRATION}
 ```
 
-## Ejecucion
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```dotenv
+DB_URL=jdbc:postgresql://localhost:5432/hotel_system_db
+DB_USER=postgres
+DB_PASSWORD=tu_password
+
+JWT_SECRET=una_clave_secreta_larga_y_segura
+JWT_EXPIRATION=3600000
+JWT_REFRESH_EXPIRATION=604800000
+```
+
+> `JWT_EXPIRATION` y `JWT_REFRESH_EXPIRATION` se expresan en milisegundos (ejemplo: 1 hora y 7 días respectivamente).
+
+## Puesta en marcha
+
+### Requisitos previos
+
+- Java 17+
+- PostgreSQL en ejecución con una base de datos creada (por ejemplo `hotel_system_db`)
+- Archivo `.env` configurado como se describe arriba
+
+### Ejecución
 
 En Windows:
 
@@ -202,10 +323,29 @@ La API queda disponible en:
 http://localhost:8090
 ```
 
-## Documentacion Swagger
+## Documentación Swagger
 
-El proyecto incluye `springdoc-openapi-starter-webmvc-ui`. Con la aplicacion en ejecucion, la documentacion puede consultarse normalmente en:
+El proyecto incluye `springdoc-openapi-starter-webmvc-ui` con soporte para autenticación Bearer. Con la aplicación en ejecución, la documentación puede consultarse en:
 
 ```text
 http://localhost:8090/swagger-ui.html
 ```
+
+Desde ahí es posible autenticarse con el `accessToken` obtenido en `/api/v1/auth/login` y probar los endpoints protegidos directamente.
+
+## Pruebas
+
+El proyecto incluye pruebas unitarias, entre ellas `JwtServiceTest` para la generación y validación de tokens. Para ejecutarlas:
+
+```bash
+./mvnw test
+```
+
+## Manejo de errores
+
+Los errores se centralizan en `GlobalExceptionHandler`, que traduce las excepciones de dominio a respuestas HTTP consistentes:
+
+- `ResourceNotFoundException` → `404 Not Found`
+- `ConflictException` → `409 Conflict`
+- Errores de autenticación → `401 Unauthorized` (vía `JwtAuthenticationEntryPoint`)
+- Errores de autorización → `403 Forbidden` (vía `JwtAccessDeniedHandler`)
